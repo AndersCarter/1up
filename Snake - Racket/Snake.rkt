@@ -8,6 +8,7 @@
 (check-expect (- (+ 2 2) 1) 3) ;; Quick Maths
 
 ;; Settings
+(define GAME-SPEED .04) ;; How many times per second the game updates
 (define CELL-SIZE 10)
 (define HEIGHT 500) ;; Must be Divisible by Cell-Size
 (define WIDTH 500)  ;; Must be Divisible by Cell-Size
@@ -43,7 +44,7 @@
 (define (run-game [world (generate-starting-world)])
   (big-bang world
             (to-draw draw-world)
-            (on-tick update-world)
+            (on-tick update-world GAME-SPEED)
             (on-key key-update)
             (stop-when game-won?)))
 
@@ -66,8 +67,22 @@
   false)
 
 ;; key-update: handles key events
-(define (key-update world key)
-  world)
+;; w -> the current world state
+;; key -> the current keyEvent
+(define (key-update w key)
+  (define snk-dir (snake-dir (world-snake w)))
+  (define new-world (void))
+  (cond [(key=? key "w") (set! snk-dir "up")]
+        [(key=? key "a") (set! snk-dir "left")]
+        [(key=? key "s") (set! snk-dir "down")]
+        [(key=? key "d") (set! snk-dir "right")]
+        [(key=? key "r") (set! new-world (generate-starting-world))])
+  (if (world? new-world)
+      new-world
+      (world (snake snk-dir (snake-segments (world-snake w)))
+                          (world-food w)
+                          (world-scene w))) 
+  )
 
 
 
@@ -137,10 +152,9 @@
 (check-expect (move-snake (snake "left" (list (loc 2 2) (loc 3 2)))) (snake "left" (list (loc 1 2) (loc 2 2))))
 
 (define (move-snake snk)
-  (define direction (snake-dir snk))
   (define segments (snake-segments snk))
-  (define new-segments (map (λ (seg) (move-segment seg direction)) segments))
-  (snake (snake-dir snk) new-segments))
+  (define head (move-segment (first segments) (snake-dir snk)))
+  (snake (snake-dir snk) (cons head (reverse (drop (reverse segments) 1)))))
 
 ;; move-segment: moves a single segment in given direction
 
@@ -159,9 +173,14 @@
   (loc x y))
 
 ;; grow-snake: adds a segment to the snake
+;; snk -> the current snake
 
-(define (grow-and-move-snake snake)
-  snake)
+(check-expect (grow-and-move-snake (snake "up" (list (loc 2 2)))) (snake "up" (list (loc 2 1) (loc 2 2))))
+
+(define (grow-and-move-snake snk)
+  (define head (first (snake-segments snk)))
+  (set! head (move-segment head (snake-dir snk)))
+  (snake (snake-dir snk) (cons head (snake-segments snk))))
 
 ;; snake-ate: determines if the snake has eaten the food
 
@@ -173,6 +192,8 @@
   (define head (first (snake-segments snake)))
   (and (= (loc-x head) (loc-x food))
        (= (loc-y head) (loc-y food))))
+
+
 
 
 ;; Random Helper Functions
@@ -187,5 +208,4 @@
 (define (generate-starting-world) (world (snake "" (list (random-loc))) (random-loc) BACKGROUND))
 
 
-
-(test)
+(run-game)
