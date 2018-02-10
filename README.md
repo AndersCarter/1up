@@ -5,6 +5,6 @@ This is mostly just a place to collect old arcade game remakes that I have made.
 the introductor Computer Science class at Berry College.
 
 Included are -
-Game - Languages implimented in
-Snake - Racket, Javascript with p5.js
-Centipede - Racket
+- Game - Languages implimented in
+- Snake - Racket, Javascript with p5.js
+- Centipede - Racket
