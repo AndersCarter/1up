@@ -11,7 +11,9 @@
 (define CELL-SIZE 10)
 (define HEIGHT 500) ;; Must be Divisible by Cell-Size
 (define WIDTH 500)  ;; Must be Divisible by Cell-Size
-(define BACKGROUND (rectangle WIDTH HEIGHT "solid" (color 211 211 211)))
+(define BACKGROUND (rectangle WIDTH HEIGHT "solid" "black"))
+(define SEGMENT (square CELL-SIZE "solid" "white"))
+(define FOOD (square CELL-SIZE "solid" "red"))
 
 ;; World
 ;; A World is an object that holds all information about the current state
@@ -47,7 +49,7 @@
 
 ;; draw-world: draws the current world state
 (define (draw-world world)
-  BACKGROUND)
+  (draw-food (world-food world)(draw-snake (world-snake world) BACKGROUND)))
 
 ;; update-world: updates the current world one time
 (define (update-world world)
@@ -61,6 +63,44 @@
 (define (key-update world key)
   world)
 
+
+;                                  
+;                                  
+;                                  
+;                                  
+;   ;;;;                           
+;    ;  ;                          
+;    ;   ;  ;; ;;;   ;;;;   ;;; ;;;
+;    ;   ;   ;;     ;    ;   ;   ; 
+;    ;   ;   ;       ;;;;;   ; ; ; 
+;    ;   ;   ;      ;    ;   ; ; ; 
+;    ;  ;    ;      ;   ;;   ; ; ; 
+;   ;;;;    ;;;;;    ;;; ;;   ; ;  
+;                                  
+;                                  
+;                                  
+;                                  
+
+;; draw-snake: draws the snake onto the given scene
+;; snake -> current snake object to draw
+;; scene -> current image of the world
+
+(define (draw-snake snake scene)
+  (define snake-loc (snake-segments snake))
+  (foldr (λ (loc img) (place-image/align SEGMENT
+                                         (* (loc-x loc) CELL-SIZE)
+                                         (* (loc-y loc) CELL-SIZE)
+                                         "left"
+                                         "top"
+                                         img))
+         scene snake-loc))
+
+;; draw-food: draws the food onto the given scene
+;; loc -> current food location
+;; scene -> current image of the world
+
+(define (draw-food loc scene)
+  (place-image/align FOOD (* (loc-x loc) CELL-SIZE) (* (loc-y loc) CELL-SIZE) "left" "top" scene))
 
 
 
